@@ -1,0 +1,40 @@
+{
+  "name": "ocbc-rewards-tracker",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Rewards Tracker MVP for OCBC 365 cardholders (NTU SC4025 Group 6 coursework, mock data only)",
+  "type": "module",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc -b"
+  },
+  "dependencies": {
+    "@tanstack/react-query": "^5.104.3",
+    "jspdf": "^4.2.1",
+    "motion": "^13.5.1",
+    "react": "^19.1.10",
+    "react-dom": "^19.1.10",
+    "react-router": "^7.18.4"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.3.3",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.3",
+    "@testing-library/user-event": "^14.6.8",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^4.7.0",
+    "jsdom": "^26.1.0",
+    "tailwindcss": "^4.3.3",
+    "typescript": "~5.9.3",
+    "vite": "^6.4.4",
+    "vitest": "^4.1.12"
+  }
+}

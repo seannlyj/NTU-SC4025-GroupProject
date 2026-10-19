@@ -1,0 +1,316 @@
+@import 'tailwindcss';
+
+/*
+ * Design tokens from the finished wireframes (design/finished/*.png).
+ * Values were sampled from the 2x PNGs; names describe the role, not the hue.
+ */
+@theme {
+  --font-sans: system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  /* Text */
+  --color-ink: #333333;
+  --color-ink-strong: #222222;
+  --color-ink-muted: #6b6b6b;
+  --color-ink-label: #666666;
+  --color-ink-body: #555555;
+  --color-ink-avatar: #444444;
+
+  /* Surfaces and lines */
+  --color-page: #ffffff;
+  --color-card: #f5f1ee;
+  --color-track: #e2dbd6;
+  --color-divider: #cfc8c3;
+  --color-divider-soft: #e6e0dc;
+  --color-back: #ede8e4;
+  --color-peach: #f5d5c0;
+  --color-outline: #afa8a3;
+  --color-field: #cccccc;
+  --color-field-strong: #aaaaaa;
+  --color-checkbox: #767676;
+  --color-tabbar-border: #dad4d0;
+  --color-sheet-divider: #e4e4e4;
+  --color-overlay: rgb(0 0 0 / 0.52);
+
+  /* Brand and status */
+  --color-brand: #ed1c24;
+  --color-brand-strong: #d4141c;
+  --color-brand-tint: #fdecec;
+  --color-brand-deep: #721c24;
+  --color-eligible: #1b6b35;
+  --color-link: #0a57d6;
+  --color-seg-pending: #b8afa9;
+  --color-seg-not-eligible: #ddd5cf;
+  --color-bar-muted: #c9c0ba;
+
+  --shadow-float: 0 4px 16px rgb(0 0 0 / 0.12);
+  --shadow-fab: 0 6px 16px rgb(212 20 28 / 0.28);
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    background: var(--color-back);
+  }
+
+  body {
+    margin: 0;
+    background: var(--color-back);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Visible focus for keyboard users on every interactive element */
+  :focus-visible {
+    outline: 2px solid var(--color-link);
+    outline-offset: 2px;
+  }
+
+  button {
+    cursor: pointer;
+  }
+
+  button:disabled,
+  [aria-disabled='true'] {
+    cursor: default;
+  }
+}
+
+@layer utilities {
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/* Skeletons shimmer: a soft highlight sweeps across the placeholder. */
+.skeleton {
+  border-radius: 6px;
+  background: linear-gradient(100deg, var(--color-track) 30%, #efe9e5 50%, var(--color-track) 70%) 0 0 / 300% 100%;
+  animation: skeleton-shimmer calc(1.3s * var(--slowmo, 1)) ease-in-out infinite;
+}
+
+@keyframes skeleton-shimmer {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: 0 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton {
+    animation: none;
+  }
+}
+
+/* Press feedback: tappable things dip slightly while held. */
+.pressable {
+  transition: transform calc(160ms * var(--slowmo, 1)) cubic-bezier(0.2, 0, 0, 1),
+    background-color 150ms ease, opacity 150ms ease;
+}
+.pressable:active:not([aria-disabled='true']):not(:disabled) {
+  transform: scale(0.96);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pressable:active {
+    transform: none !important;
+  }
+}
+
+/* The PDF preview page is a fixed A4-width sheet, and prints as one. */
+@media print {
+  html,
+  body {
+    background: #ffffff;
+  }
+  .no-print {
+    display: none !important;
+  }
+}
+
+/*
+ * Screen transitions (View Transitions API, see src/app/navigation.tsx).
+ * <html data-nav> says which animation the current navigation plays:
+ *   forward      shared axis: the old screen drifts left and fades out, then the new
+ *                one drifts in from the right; its elements rise into place in
+ *                sequence (src/motion/primitives.tsx)
+ *   back         the mirror image, without the element entrance
+ *   fade         quick crossfade (Retry, list <-> no-match, Demo panel jumps)
+ *   sheet-open   filter sheet slides up over a fading backdrop
+ *   sheet-close  filter sheet slides down
+ *   none         the screen animates itself (History tabs, filter changes)
+ * The tab bar, the Home/Rewards top bar and the Demo panel have their own
+ * names, so they stay put while screens move underneath. Browsers without view transitions switch instantly.
+ * Every duration is multiplied by --slowmo (dev-only ?slowmo=8 for reviewing).
+ */
+:root {
+  --slowmo: 1;
+  --vt-out: calc(190ms * var(--slowmo));
+  --vt-in: calc(460ms * var(--slowmo));
+  --vt-in-delay: calc(60ms * var(--slowmo));
+  --vt-fade-out: calc(130ms * var(--slowmo));
+  --vt-fade-in: calc(240ms * var(--slowmo));
+  --vt-sheet-in: calc(460ms * var(--slowmo));
+  --vt-sheet-out: calc(260ms * var(--slowmo));
+  /* Material 3 emphasised curves */
+  --vt-decel: cubic-bezier(0.05, 0.7, 0.1, 1);
+  --vt-accel: cubic-bezier(0.3, 0, 0.8, 0.15);
+  --vt-shift: min(14%, 60px);
+}
+
+.vt-bottom-nav {
+  view-transition-name: bottom-nav;
+}
+.vt-top-bar {
+  view-transition-name: top-bar;
+}
+.vt-demo {
+  view-transition-name: demo-panel;
+}
+.vt-sheet {
+  view-transition-name: filter-sheet;
+}
+.vt-backdrop {
+  view-transition-name: sheet-backdrop;
+}
+
+/* Fixed chrome is identical before and after: no morphing. */
+::view-transition-group(bottom-nav),
+::view-transition-group(demo-panel),
+::view-transition-group(top-bar) {
+  animation-duration: var(--vt-fade-in);
+}
+
+/* On phones the column is the whole screen: keep the gap between screens white, not grey. */
+@media (max-width: 480px) {
+  ::view-transition-image-pair(root) {
+    background: var(--color-page);
+  }
+}
+
+/* The top bar (Home and Rewards only) holds still between those two screens and
+   moves with the screen when only one side of the change has it. */
+html[data-nav='forward']::view-transition-old(root),
+html[data-nav='forward']::view-transition-old(top-bar):only-child {
+  animation: var(--vt-out) var(--vt-accel) both vt-exit-left;
+}
+html[data-nav='forward']::view-transition-new(root),
+html[data-nav='forward']::view-transition-new(top-bar):only-child {
+  animation: var(--vt-in) var(--vt-decel) var(--vt-in-delay) both vt-enter-from-right;
+}
+html[data-nav='back']::view-transition-old(root),
+html[data-nav='back']::view-transition-old(top-bar):only-child {
+  animation: var(--vt-out) var(--vt-accel) both vt-exit-right;
+}
+html[data-nav='back']::view-transition-new(root),
+html[data-nav='back']::view-transition-new(top-bar):only-child {
+  animation: var(--vt-in) var(--vt-decel) var(--vt-in-delay) both vt-enter-from-left;
+}
+
+html[data-nav='fade']::view-transition-old(root),
+html[data-nav='fade']::view-transition-old(top-bar):only-child {
+  animation: var(--vt-fade-out) var(--vt-accel) both vt-fade-out;
+}
+html[data-nav='fade']::view-transition-new(root),
+html[data-nav='fade']::view-transition-new(top-bar):only-child {
+  animation: var(--vt-fade-in) var(--vt-decel) both vt-fade-in;
+}
+
+/* The page under the sheet does not move; 'none' screens animate themselves. */
+html[data-nav='sheet-open']::view-transition-old(root),
+html[data-nav='sheet-open']::view-transition-new(root),
+html[data-nav='sheet-close']::view-transition-old(root),
+html[data-nav='sheet-close']::view-transition-new(root),
+html[data-nav='none']::view-transition-old(root),
+html[data-nav='none']::view-transition-new(root) {
+  animation: none;
+}
+
+::view-transition-new(filter-sheet) {
+  animation: var(--vt-sheet-in) var(--vt-decel) both vt-sheet-up;
+}
+::view-transition-old(filter-sheet) {
+  animation: var(--vt-sheet-out) var(--vt-accel) both vt-sheet-down;
+}
+::view-transition-new(sheet-backdrop) {
+  animation: var(--vt-sheet-in) var(--vt-decel) both vt-fade-in;
+}
+::view-transition-old(sheet-backdrop) {
+  animation: var(--vt-sheet-out) var(--vt-accel) both vt-fade-out;
+}
+
+@keyframes vt-exit-left {
+  to {
+    transform: translateX(calc(-1 * var(--vt-shift)));
+    opacity: 0;
+  }
+}
+@keyframes vt-enter-from-right {
+  from {
+    transform: translateX(var(--vt-shift));
+    opacity: 0;
+  }
+}
+@keyframes vt-exit-right {
+  to {
+    transform: translateX(var(--vt-shift));
+    opacity: 0;
+  }
+}
+@keyframes vt-enter-from-left {
+  from {
+    transform: translateX(calc(-1 * var(--vt-shift)));
+    opacity: 0;
+  }
+}
+@keyframes vt-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes vt-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+@keyframes vt-sheet-up {
+  from {
+    transform: translateY(100%);
+  }
+}
+@keyframes vt-sheet-down {
+  to {
+    transform: translateY(100%);
+  }
+}
+
+/* Without view transitions, the sheet still slides up when it opens. */
+@supports not (view-transition-name: none) {
+  .vt-sheet {
+    animation: var(--vt-sheet-in) var(--vt-decel) both vt-sheet-up;
+  }
+  .vt-backdrop {
+    animation: var(--vt-sheet-in) var(--vt-decel) both vt-fade-in;
+  }
+}
+
+/* Reduced motion: no sliding, just a quick crossfade. */
+@media (prefers-reduced-motion: reduce) {
+  html[data-nav]::view-transition-group(*) {
+    animation-duration: 0s !important;
+  }
+  html[data-nav]::view-transition-old(*) {
+    animation: 120ms ease both vt-fade-out !important;
+    box-shadow: none !important;
+  }
+  html[data-nav]::view-transition-new(*) {
+    animation: 120ms ease both vt-fade-in !important;
+    box-shadow: none !important;
+  }
+  .vt-sheet,
+  .vt-backdrop {
+    animation: none !important;
+  }
+}
