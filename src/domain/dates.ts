@@ -59,6 +59,18 @@ export function lastDayOf(month: MonthKey): IsoDate {
   return `${month}-${pad(daysInMonth(y, m))}`;
 }
 
+/** 0 = Sunday … 6 = Saturday. */
+export function weekdayOf(iso: IsoDate): number {
+  const [y, m, d] = parts(iso);
+  return new Date(Date.UTC(y, m - 1, d)).getUTCDay();
+}
+
+export function addDays(iso: IsoDate, delta: number): IsoDate {
+  const [y, m, d] = parts(iso);
+  const date = new Date(Date.UTC(y, m - 1, d + delta));
+  return `${date.getUTCFullYear()}-${pad(date.getUTCMonth() + 1)}-${pad(date.getUTCDate())}`;
+}
+
 export function addMonths(month: MonthKey, delta: number): MonthKey {
   const [y, m] = month.split('-').map(Number);
   const index = y * 12 + (m - 1) + delta;
@@ -86,6 +98,13 @@ export function isWithin(date: IsoDate, from?: IsoDate, to?: IsoDate): boolean {
 export function formatDayMonth(iso: IsoDate): string {
   const [, m, d] = parts(iso);
   return `${pad(d)} ${MONTHS_SHORT[m - 1]}`;
+}
+
+const WEEKDAYS_SHORT = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+/** '2026-11-16' -> 'Mon, 16 Nov' */
+export function formatWeekdayDayMonth(iso: IsoDate): string {
+  return `${WEEKDAYS_SHORT[weekdayOf(iso)]}, ${formatDayMonth(iso)}`;
 }
 
 /** '2026-10-01' -> '01 Oct 2026' */

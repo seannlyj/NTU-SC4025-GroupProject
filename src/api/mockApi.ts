@@ -2,6 +2,7 @@ import { CATEGORY_IDS } from '../config/categories';
 import { MOCK_NOW } from '../config/clock';
 import { CASHBACK_POLICY } from '../config/policy';
 import { monthCashback } from '../domain/cashback';
+import { getExpectedCreditDate } from '../domain/creditDate';
 import { isWithin, monthOf } from '../domain/dates';
 import type { MonthHistory } from '../domain/history';
 import { sumCents } from '../domain/money';
@@ -68,6 +69,8 @@ export const mockApi: RewardsApi = {
       return {
         month: OCTOBER_MONTH,
         updatedAt: MOCK_NOW,
+        // October cashback: Monday 16 Nov 2026. A real backend would send its own date.
+        expectedCreditDate: getExpectedCreditDate(OCTOBER_MONTH),
         transactions: clone(OCTOBER_TRANSACTIONS),
         categories: clone(OCTOBER_CATEGORY_SUMMARY),
       };

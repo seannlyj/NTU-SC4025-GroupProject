@@ -108,6 +108,39 @@ describe('Dashboard states', () => {
   });
 });
 
+describe('Expected credit date (US11)', () => {
+  const line = (text: string) => (_: string, el: Element | null) => el?.tagName === 'P' && el.textContent === text;
+
+  it('sits in the cashback card under the monthly cap, from the API', async () => {
+    renderAt('/rewards');
+    const date = await screen.findByText(line('Expected credit date: Mon, 16 Nov'));
+    const card = screen.getByLabelText('Cashback this month');
+    expect(card).toContainElement(date);
+    // Directly under the cap line, in the same small grey style.
+    const cap = within(card).getByText('S$160.00 monthly cap');
+    expect(cap.nextElementSibling).toBe(date);
+    expect(date).toHaveClass('text-[13px]', 'text-ink-muted');
+    expect(date).not.toHaveClass('font-semibold');
+  });
+
+  it('reads Unavailable when the rewards data cannot load', async () => {
+    renderAt('/unavailable');
+    const date = await screen.findByText(line('Expected credit date: Unavailable'));
+    expect(screen.getByLabelText('Cashback this month')).toContainElement(date);
+    expect(date).toHaveClass('text-[13px]', 'text-ink-muted');
+  });
+
+  it('keeps its space with a placeholder while loading, and is absent without a card', async () => {
+    renderAt('/rewards?state=loading');
+    await screen.findByText('Loading your rewards');
+    expect(screen.queryByText(/Expected credit date/)).not.toBeInTheDocument();
+    current.unmount();
+    renderAt('/no-card');
+    await screen.findByText('No eligible OCBC credit cards are available');
+    expect(screen.queryByText(/Expected credit date/)).not.toBeInTheDocument();
+  });
+});
+
 describe('Transactions (/transactions)', () => {
   it('shows all 13 rows grouped by date, tallying to S$2,100.00 and S$1.55', async () => {
     renderAt('/transactions');

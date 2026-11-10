@@ -21,6 +21,8 @@ describe('mockApi (normal)', () => {
     expect(overview.updatedAt).toBe('2026-10-12T22:10');
     expect(overview.transactions).toHaveLength(13);
     expect(overview.categories).toHaveLength(8);
+    // October cashback is expected on Monday 16 Nov 2026.
+    expect(overview.expectedCreditDate).toBe('2026-11-16');
   });
 
   it('returns transactions for any range', async () => {

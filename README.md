@@ -84,8 +84,9 @@ Motion works on two layers.
 Motion), elements ease in on a choreographed timeline:
 
 - **Dashboard:** title, then the two cards rise in turn. Cashback, eligible spend and total spend count up from
-  zero, the progress bars fill, the split bar's three segments fill one after another, the "to go" chip pops,
-  recent rows slide in, the category tiles ripple in and the shortcut icons pop.
+  zero, the progress bars fill, the expected credit date eases in under the cap, the split bar's three segments fill
+  one after another, the "to go" chip pops, recent rows slide in, the category tiles ripple in and the shortcut icons
+  pop.
 - **Transactions:** date groups rise one after another and the Filter button springs in. Changing filters makes
   chips pop in and out while groups that leave fade away and the rest glide into place.
 - **Filter sheet:** its sections cascade in as it opens; ticking a box fills it and draws the tick; the match count
@@ -122,6 +123,9 @@ Pure, unit-tested functions in [`src/domain`](src/domain):
 - Total card spending = eligible + pending + not eligible. "To go" = max(0, 800 − eligible).
 - Cashback is calculated per transaction (rounded half up), summed and capped. Tiers above the minimum can be added in
   [`src/config/policy.ts`](src/config/policy.ts).
+- Expected credit date (US11): the 16th of the following month, moved to the Monday if it falls on a weekend, shown
+  as "Mon, 16 Nov" under the monthly cap. The rule is not decided; change it in
+  [`src/domain/creditDate.ts`](src/domain/creditDate.ts).
 
 Easy-to-change configuration lives in [`src/config`](src/config): category names (`categories.ts`), the cashback
 policy (`policy.ts`), the mock clock (`clock.ts`) and the eligibility rules (`eligibilityRules.ts`, summarised from
@@ -133,7 +137,8 @@ Every default and design decision is listed in [`ASSUMPTIONS.md`](ASSUMPTIONS.md
 ## Seed data
 
 October 2026, last updated 12 Oct, 22:10: total S$2,100.00 = Eligible S$620.00 + Pending S$300.00 +
-Not eligible S$1,180.00, so S$620.00 / S$800.00 with S$180.00 to go and S$1.55 cashback.
+Not eligible S$1,180.00, so S$620.00 / S$800.00 with S$180.00 to go and S$1.55 cashback, expected to be credited on
+Mon, 16 Nov 2026.
 [`src/api/seed/seed.test.ts`](src/api/seed/seed.test.ts) proves the seed tallies with the brief and the wireframes,
 and [`src/screens/screens.test.tsx`](src/screens/screens.test.tsx) checks the numbers on every screen.
 

@@ -5,7 +5,7 @@ import type { CategoryStat, RewardsOverview } from '../api';
 import { scenarioKey, useCard, useOverview } from '../app/queries';
 import { categoryName } from '../config/categories';
 import { CASHBACK_POLICY } from '../config/policy';
-import { formatUpdatedAt } from '../domain/dates';
+import { formatUpdatedAt, formatWeekdayDayMonth } from '../domain/dates';
 import { formatSGD } from '../domain/money';
 import { recentTransactions, splitSegments, summarizeMonth, type MonthSummary } from '../domain/summary';
 import type { Card as CardModel } from '../domain/types';
@@ -86,7 +86,16 @@ function CardIdentity({ card, delay = 0 }: { card: CardModel; delay?: number }) 
   );
 }
 
-function CashbackCard({ card, summary }: { card: CardModel; summary: MonthSummary }) {
+/** US11: small and grey like the cap line above it, so it informs without competing with the figures. */
+function CreditDateLine({ date, delay, className = 'mt-[2px]' }: { date: string | null; delay: number; className?: string }) {
+  return (
+    <Rise as="p" y={6} delay={delay} className={`${className} text-[13px] leading-[18px] text-ink-muted`}>
+      Expected credit date: {date ? formatWeekdayDayMonth(date) : 'Unavailable'}
+    </Rise>
+  );
+}
+
+function CashbackCard({ card, summary, creditDate }: { card: CardModel; summary: MonthSummary; creditDate: string }) {
   return (
     <Rise y={18} scale={0.985} delay={dur(0.06)}>
       <Card className="px-5 pt-5 pb-5" aria-label="Cashback this month">
@@ -107,6 +116,8 @@ function CashbackCard({ card, summary }: { card: CardModel; summary: MonthSummar
           valueText={`${formatSGD(summary.cashbackCents)} of ${formatSGD(summary.capCents)} cap`}
         />
         <p className="mt-[6px] text-[13px] leading-[18px] text-ink-muted">{formatSGD(summary.capCents)} monthly cap</p>
+        {/* Eases in as the cap bar starts to fill. */}
+        <CreditDateLine date={creditDate} delay={dur(0.45)} />
       </Card>
     </Rise>
   );
@@ -225,7 +236,7 @@ function DashboardView({ card, overview }: { card: CardModel; overview: RewardsO
   return (
     <>
       <div className="mt-3 space-y-3 px-4">
-        <CashbackCard card={card} summary={summary} />
+        <CashbackCard card={card} summary={summary} creditDate={overview.expectedCreditDate} />
         <MinimumSpendCard summary={summary} updatedAt={overview.updatedAt} />
       </div>
 
@@ -297,6 +308,7 @@ function UnavailableView({
               <p className="text-[16px] text-ink">Cashback this month</p>
               <p className="text-[18px] font-semibold text-ink">Unavailable</p>
             </div>
+            <CreditDateLine date={null} delay={dur(0.2)} className="mt-2" />
           </Card>
         </Rise>
         <Rise y={18} delay={dur(0.12)}>
@@ -354,6 +366,8 @@ function DashboardSkeleton({ card }: { card?: CardModel }) {
             </div>
             <Skeleton className="mt-[9px] h-2 w-full" />
             <Skeleton className="mt-[10px] h-4 w-36" />
+            {/* Holds the expected credit date line's space, so the card does not grow when it arrives. */}
+            <Skeleton className="mt-[6px] h-4 w-52" />
           </Card>
           <Card className="px-5 pt-4 pb-4">
             <Skeleton className="h-6 w-36" />

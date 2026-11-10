@@ -10,6 +10,8 @@ export interface CategoryStat extends CategoryMonthToDate {
 export interface RewardsOverview {
   month: MonthKey;
   updatedAt: IsoDateTime;
+  /** When this month's cashback is expected to be credited (always a weekday). */
+  expectedCreditDate: IsoDate;
   /** All transactions in the current month so far. */
   transactions: Transaction[];
   /** Category summary from the categorisation service, in category order. */
